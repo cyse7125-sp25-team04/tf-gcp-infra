@@ -21,11 +21,16 @@ jobs:
       with:
         fetch-depth: 1 # Only the latest commit is needed for the PR checks
 
-    # Step 2: Set up Terraform
+    # Step 2: Set up Terraform and GCP. GCP is required because we are savinng the state in bucket
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: ${{ env.TF_VERSION }}
+
+    - name: setup google config
+      uses: 'google-github-actions/auth@v2'
+      with:
+        credentials_json: '${{secrets.GCP_CREDENTIALS}}'
 
     # Step 3: Initialize Terraform (no remote backend setup)
     - name: Terraform Init
