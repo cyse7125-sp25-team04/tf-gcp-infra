@@ -3,6 +3,13 @@ provider "google" {
   region  = var.region
 }
 
+terraform {
+  backend "gcs" {
+    bucket = "tf-gcp-dns-infra-state"
+    prefix = "terraform/state"
+  }
+}
+
 resource "google_dns_managed_zone" "gcp_dns_zone" {
   name        = var.gcp_zone_name
   dns_name    = var.gcp_dns_name
