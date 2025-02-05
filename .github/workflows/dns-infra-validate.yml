@@ -1,0 +1,59 @@
+name: Terraform DNS Records validate
+
+on:
+  pull_request:
+    branches:
+      - main
+env:
+  TF_VERSION: '1.5.0'
+
+permissions: read-all
+
+jobs:
+  terraform:
+    name: Terraform Lint, Format, and Validate
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout Code
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 1 # Only the latest commit is needed for the PR checks
+
+    # Step 2: Set up Terraform and GCP. GCP is required because we are savinng the state in bucket
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+
+    - name: setup google config
+      uses: 'google-github-actions/auth@v2'
+      with:
+        credentials_json: '${{secrets.GCP_CREDENTIALS}}'
+
+    # Step 3: Initialize Terraform (no remote backend setup)
+    - name: Terraform Init
+      run: terraform init
+      working-directory: ./gcp-project-dns
+
+    # Step 4: Terraform Format Check
+    - name: Terraform Format
+      id: fmt
+      run: terraform fmt -check -recursive
+      working-directory: ./gcp-project-dns
+      continue-on-error: false
+
+    # Step 6: Terraform Validate
+    - name: Terraform Validate
+      run: terraform validate
+      working-directory: ./gcp-project-dns
+
+    # Step 8: Clean up sensitive data
+    - name: Remove Terraform State
+      run: rm -rf .terraform/ terraform.tfstate terraform.tfstate.backup
+      working-directory: ./gcp-project-dns
+
+    # Security Check: Check out dependencies and avoid cache files
+    - name: Clear Caches
+      run: sudo rm -rf ~/.cache/terraform
