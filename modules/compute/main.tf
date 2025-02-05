@@ -29,7 +29,7 @@ resource "google_compute_instance" "vm" {
     }
   }
 
-  tags = concat(var.network_tags, ["private-subnet-vm"])
+  tags = concat(var.network_tags, ["private-subnet-vm","allow-ssh"])
 
   service_account {
     email  = var.service_account_email
@@ -50,5 +50,5 @@ resource "google_compute_firewall" "allow_ssh" {
 
   # You might want to restrict this to specific IP ranges
   source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["public-vm"]
+  target_tags   = ["allow-ssh"]
 }
