@@ -7,12 +7,12 @@ resource "google_compute_subnetwork" "private" {
   private_ip_google_access = false
 
   secondary_ip_range {
-    range_name    = "pod-ip-range"
+    range_name    = "k8s-pod-ip-range"
     ip_cidr_range = var.pod_ip_range
   }
 
   secondary_ip_range {
-    range_name    = "service-ip-range"
+    range_name    = "k8s-service-ip-range"
     ip_cidr_range = var.service_ip_range
   }
 }
