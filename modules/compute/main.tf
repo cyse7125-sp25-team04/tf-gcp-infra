@@ -29,7 +29,7 @@ resource "google_compute_instance" "vm" {
     }
   }
 
-  tags = concat(var.network_tags, ["private-subnet-vm","allow-ssh"])
+  tags = concat(var.network_tags, ["private-subnet-vm", "allow-ssh"])
 
   service_account {
     email  = var.service_account_email
