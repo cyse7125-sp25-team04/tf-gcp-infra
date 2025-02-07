@@ -32,8 +32,10 @@ module "compute" {
   region            = var.region
   vpc_id            = module.vpc.vpc_id
   private_subnet_id = module.subnets.private_subnet_id # Using private subnet
+  public_subnet_id  = module.subnets.public_subnet_id
   machine_type      = "e2-medium"
   network_tags      = ["private-vm", "${var.env_name}-private"]
+  project_id        = var.project_id
 
   depends_on = [module.vpc, module.subnets]
 }

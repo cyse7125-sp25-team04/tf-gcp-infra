@@ -68,6 +68,11 @@ variable "private_subnet_id" {
   type        = string
 }
 
+variable "public_subnet_id" {
+  description = "Public subnet ID where the VM will be created"
+  type        = string
+}
+
 variable "network_tags" {
   description = "Network tags to apply to the instance"
   type        = list(string)
@@ -125,3 +130,7 @@ variable "env_name" {
   default     = "dev"
 }
 
+variable "project_id" {
+  description = "GCP Project ID"
+  type        = string
+}

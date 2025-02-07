@@ -7,6 +7,13 @@ resource "google_container_cluster" "my_cluster" {
   remove_default_node_pool = true
   initial_node_count       = 1
 
+  node_config {
+    disk_type = "pd-standard"
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/cloud-platform"
+    ]
+  }
+
   private_cluster_config {
     enable_private_nodes    = true
     enable_private_endpoint = false
@@ -42,7 +49,8 @@ resource "google_container_node_pool" "primary_preemptible_nodes" {
   #}
 
   node_config {
-    machine_type = "e2-standard-4"
+    machine_type = "e2-micro"
+    disk_size_gb = 10
     image_type   = "COS_CONTAINERD"
     disk_type    = "pd-standard"
     labels = {
