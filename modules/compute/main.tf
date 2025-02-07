@@ -37,6 +37,32 @@ resource "google_compute_instance" "vm" {
   }
 }
 
+resource "google_compute_instance" "bastion_host" {
+  project                   = var.project_id
+  name                      = "${var.env_name}-bastion-host"
+  machine_type              = "e2-medium"
+  zone                      = "us-east1-b"
+  allow_stopping_for_update = true
+
+  tags = concat(var.network_tags, ["public-subnet-vm", "allow-ssh"])
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-12"
+    }
+  }
+
+  network_interface {
+    subnetwork = var.public_subnet_id
+    access_config {
+      // To allow external IP access
+    }
+  }
+
+  metadata_startup_script = file("${path.module}/startup_script.sh")
+
+}
+
 resource "google_compute_firewall" "allow_ssh" {
   name    = "${var.env_name}-allow-ssh"
   network = var.vpc_id
