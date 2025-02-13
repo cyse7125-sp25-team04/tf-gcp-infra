@@ -8,7 +8,7 @@ pipeline{
                 }
             }
         }
-        stage("Initialize and validate the terraform"){
+        stage("Initialize and validate Terraform"){
             matrix{
                 axes{
                     axis{
@@ -16,23 +16,23 @@ pipeline{
                         values 'gcp-project-demo', 'gcp-project-dev'
                     }
                 }
-                stages{
-                    stage("Initialize Terraform"){
-                        steps{
-                            dir("${ENV_DIR}") {
-                                steps{
-                                    sh "terraform init"
-                                }
+                
+                stage("Initialize Terraform"){
+                    steps {
+                        dir("${ENV_DIR}") {
+                            steps{
+                                sh "terraform init"
                             }
                         }
+                        
                     }
+                }
 
-                    stage("Validate Terraform"){
-                        steps{
-                            dir("${ENV_DIR}") {
-                                script{
-                                    sh "terraform validate"
-                                }
+                stage("Validate Terraform") {
+                    steps {
+                        dir("${ENV_DIR}") {
+                            script{
+                                sh "terraform validate"
                             }
                         }
                     }
