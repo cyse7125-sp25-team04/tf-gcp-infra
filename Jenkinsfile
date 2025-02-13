@@ -1,10 +1,35 @@
 pipeline{
     agent any
     stages{
-        stage("init"){
+        stage("Validate the file"){
             steps{
-                script{
-                    echo "init"
+                sh terraform fmt --check -recursive 
+            }
+        }
+        stage("Initialize and validate the terraform"){
+            matrix{
+                axes{
+                    axis{
+                        name 'ENV_DIR'
+                        values 'gcp-project-demo', 'gcp-project-dev'
+                    }
+                }
+            }
+            stages{
+                stage("Initialize Terraform"){
+                    steps{
+                        dir(${ENV_DIR}) {
+                            sh terraform init
+                        }
+                    }
+                }
+
+                stage("Validate Terraform"){
+                    steps{
+                        dir(${ENV_DIR}) {
+                            sh terraform validate
+                        }
+                    }
                 }
             }
         }
