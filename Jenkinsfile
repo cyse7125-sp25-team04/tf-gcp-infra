@@ -3,7 +3,9 @@ pipeline{
     stages{
         stage("Validate the file"){
             steps{
-                sh terraform fmt --check -recursive 
+                script{
+                    sh "terraform fmt --check -recursive" 
+                }
             }
         }
         stage("Initialize and validate the terraform"){
@@ -18,16 +20,20 @@ pipeline{
             stages{
                 stage("Initialize Terraform"){
                     steps{
-                        dir(${ENV_DIR}) {
-                            sh terraform init
+                        dir("${ENV_DIR}") {
+                            steps{
+                                sh "terraform init"
+                            }
                         }
                     }
                 }
 
                 stage("Validate Terraform"){
                     steps{
-                        dir(${ENV_DIR}) {
-                            sh terraform validate
+                        dir("${ENV_DIR}") {
+                            script{
+                                sh "terraform validate"
+                            }
                         }
                     }
                 }
