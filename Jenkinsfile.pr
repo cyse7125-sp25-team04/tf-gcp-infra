@@ -19,9 +19,6 @@ pipeline {
     stages {
         stage('Hello') {
             steps {
-                script {
-                    sendGitHubStatus('pending', 'Build started', 'jenkins/build')
-                }
                 echo "current version = ${CURRENT_VERSION}"
                 echo "next version = ${NEXT_VERSION}"
             }
@@ -67,12 +64,12 @@ pipeline {
     post {
         success {
             script {
-                sendGitHubStatus('success', 'Build passed', 'jenkins/build')
+                sendGitHubStatus('success', 'PR commit validation passed', 'jenkins/pr-commit-validation-check')
             }
         }
         failure {
             script {
-                sendGitHubStatus('failure', 'Build failed', 'jenkins/build')
+                sendGitHubStatus('failure', 'PR commit validation failed', 'jenkins/pr-commit-validation-check')
             }
         }
     }
