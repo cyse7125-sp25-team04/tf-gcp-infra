@@ -52,9 +52,4 @@ pipeline {
             }
         }
     }
-    post {
-        always {
-            githubNotify context: 'jenkins/pipeline2', status: currentBuild.result == 'SUCCESS' ? 'SUCCESS' : 'FAILURE', description: "Test result: ${currentBuild.result}"
-        }
-    }
 }
