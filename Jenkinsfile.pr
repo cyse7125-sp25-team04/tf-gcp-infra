@@ -4,7 +4,7 @@ pipeline {
     environment {
         CURRENT_VERSION = currentVersion()
         NEXT_VERSION = nextVersion()
-        GITHUB_PAT = credentials('github-pat') // GitHub Personal Access Token
+        GITHUB_PAT = credentials('shalom-PAT') // GitHub Personal Access Token
         
         // Extract repository owner/name dynamically
         REPO = sh(
