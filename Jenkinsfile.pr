@@ -81,9 +81,9 @@ pipeline {
 // Function to send status to GitHub
 def sendGitHubStatus(String state, String description, String context) {
     sh """
-        curl -X POST -H "Authorization: token $GITHUB_PAT" \
+        curl -X POST -H "Authorization: token ${env.GITHUB_PAT}" \
         -H "Accept: application/vnd.github.v3+json" \
-        https://api.github.com/repos/$REPO/statuses/$SHA \
+        https://api.github.com/repos/${env.REPO}/statuses/${env.SHA} \
         -d '{
             "state": "$state",
             "description": "$description",
