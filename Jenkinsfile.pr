@@ -64,19 +64,19 @@ pipeline {
     post {
         success {
             script {
-                sendGitHubStatus('success', 'PR commit validation passed', 'jenkins/pr-commit-validation-check')
+                sendGitHubStatus('success', 'PR commit validation passed', 'jenkins/pr-commit-validation-check', 'env.BUILD_URL')
             }
         }
         failure {
             script {
-                sendGitHubStatus('failure', 'PR commit validation failed', 'jenkins/pr-commit-validation-check')
+                sendGitHubStatus('failure', 'PR commit validation failed', 'jenkins/pr-commit-validation-check', 'env.BUILD_URL')
             }
         }
     }
 }
 
-// Function to send status to GitHub
-def sendGitHubStatus(String state, String description, String context) {
+// Function to send status to GitHub with Jenkins job URL
+def sendGitHubStatus(String state, String description, String context, String targetUrl) {
     sh """
         curl -X POST -H "Authorization: token ${env.GITHUB_PAT}" \
         -H "Accept: application/vnd.github.v3+json" \
@@ -84,7 +84,8 @@ def sendGitHubStatus(String state, String description, String context) {
         -d '{
             "state": "$state",
             "description": "$description",
-            "context": "$context"
+            "context": "$context",
+            "target_url": "$targetUrl"
         }'
     """
 }
