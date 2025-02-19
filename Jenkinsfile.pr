@@ -4,13 +4,25 @@ pipeline {
     environment {
         CURRENT_VERSION = currentVersion()
         NEXT_VERSION = nextVersion()
+        GITHUB_PAT = credentials('github-pat') // GitHub Personal Access Token
+        
+        // Extract repository owner/name dynamically
+        REPO = sh(
+            script: "git config --get remote.origin.url | sed -E 's#.*/([^/]+/[^.]+)(\\.git)?\$#\\1#'",
+            returnStdout: true
+        ).trim()
+
+        // Extract the latest commit SHA
+        SHA = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
     }
 
     stages {
-
         stage('Hello') {
             steps {
-                echo "current vesion = ${CURRENT_VERSION}"
+                script {
+                    sendGitHubStatus('pending', 'Build started', 'jenkins/build')
+                }
+                echo "current version = ${CURRENT_VERSION}"
                 echo "next version = ${NEXT_VERSION}"
             }
         }
@@ -27,8 +39,7 @@ pipeline {
                     // Echo the commit message for visibility
                     echo "Current commit message: '${commitMessage}'"
                     
-                    // Simple regex for conventional commits with case insensitivity and BREAKING CHANGE
-                    // (?i) makes the pattern case insensitive
+                    // Simple regex for conventional commits
                     def pattern = '(?i)^(feat|fix|docs|chore|style|refactor|test|perf|build|ci|revert)(!|: breaking change|: BREAKING CHANGE)?:.+'
                     
                     if (!(commitMessage =~ pattern)) {
@@ -52,4 +63,31 @@ pipeline {
             }
         }
     }
+    
+    post {
+        success {
+            script {
+                sendGitHubStatus('success', 'Build passed', 'jenkins/build')
+            }
+        }
+        failure {
+            script {
+                sendGitHubStatus('failure', 'Build failed', 'jenkins/build')
+            }
+        }
+    }
+}
+
+// Function to send status to GitHub
+def sendGitHubStatus(String state, String description, String context) {
+    sh """
+        curl -X POST -H "Authorization: token $GITHUB_PAT" \
+        -H "Accept: application/vnd.github.v3+json" \
+        https://api.github.com/repos/$REPO/statuses/$SHA \
+        -d '{
+            "state": "$state",
+            "description": "$description",
+            "context": "$context"
+        }'
+    """
 }
