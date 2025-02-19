@@ -64,12 +64,12 @@ pipeline {
     post {
         success {
             script {
-                sendGitHubStatus('success', 'PR commit validation passed', 'jenkins/pr-commit-validation-check', 'env.BUILD_URL')
+                sendGitHubStatus('success', 'PR commit validation passed', 'jenkins/pr-commit-validation-check', env.BUILD_URL)
             }
         }
         failure {
             script {
-                sendGitHubStatus('failure', 'PR commit validation failed', 'jenkins/pr-commit-validation-check', 'env.BUILD_URL')
+                sendGitHubStatus('failure', 'PR commit validation failed', 'jenkins/pr-commit-validation-check', env.BUILD_URL)
             }
         }
     }
