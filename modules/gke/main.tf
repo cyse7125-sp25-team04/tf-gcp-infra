@@ -49,8 +49,8 @@ resource "google_container_node_pool" "primary_preemptible_nodes" {
   #}
 
   node_config {
-    machine_type = "e2-micro"
-    disk_size_gb = 10
+    machine_type = "e2-medium"
+    disk_size_gb = 20
     image_type   = "COS_CONTAINERD"
     disk_type    = "pd-standard"
     labels = {
@@ -60,4 +60,48 @@ resource "google_container_node_pool" "primary_preemptible_nodes" {
       "https://www.googleapis.com/auth/cloud-platform"
     ]
   }
+}
+
+resource "google_service_account" "bucket_updater" {
+  account_id = "bucket-access"
+  display_name = "Bucket Access"
+  
+}
+
+resource "google_project_iam_member" "bucket_updater_role" {
+  project = var.project_id
+  role    = "roles/storage.admin"
+  member = "serviceAccount:${google_service_account.bucket_updater.email}"
+}
+
+resource "google_project_iam_member" "service_usage_permission" {
+  project = var.project_id
+  role    = "roles/serviceusage.serviceUsageConsumer"
+  member  = "serviceAccount:${google_service_account.bucket_updater.email}"
+}
+
+resource "kubernetes_namespace" "webapp" {
+  metadata {
+    name = "webapp"
+  }  
+}
+
+resource "kubernetes_service_account" "name" {
+  metadata {
+    name = "pod-service-account"
+    namespace = kubernetes_namespace.webapp.metadata.0.name
+    annotations = {
+      "iam.gke.io/gcp-service-account" = google_service_account.bucket_updater.email
+    }
+  }
+
+}
+
+resource "google_service_account_iam_binding" "workload_identity" {
+  service_account_id = google_service_account.bucket_updater.name
+  role               = "roles/iam.workloadIdentityUser"
+
+  members = [
+    "serviceAccount:${var.project_id}.svc.id.goog[webapp/pod-service-account]"
+  ]
 }

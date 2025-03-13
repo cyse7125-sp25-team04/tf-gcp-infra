@@ -4,7 +4,7 @@ resource "google_compute_subnetwork" "private" {
   network                  = var.vpc_id
   region                   = var.region
   project                  = var.project_id
-  private_ip_google_access = false
+  private_ip_google_access = true
 
   secondary_ip_range {
     range_name    = "k8s-pod-ip-range"
