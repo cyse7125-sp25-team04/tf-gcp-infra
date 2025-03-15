@@ -1,3 +1,4 @@
+
 resource "google_container_cluster" "my_cluster" {
   project                  = var.project_id
   name                     = "${var.env_name}-gke-cluster"
@@ -6,6 +7,7 @@ resource "google_container_cluster" "my_cluster" {
   subnetwork               = var.private_subnet_id
   remove_default_node_pool = true
   initial_node_count       = 1
+  min_master_version       = "1.30.9"
 
   node_config {
     disk_type = "pd-standard"
@@ -33,34 +35,64 @@ resource "google_container_cluster" "my_cluster" {
     evaluation_mode = "PROJECT_SINGLETON_POLICY_ENFORCE"
   }
 
+  timeouts {
+    delete = "40m"  # Adjust as needed for your environment
+  }
+
   deletion_protection = false
 }
 
-resource "google_container_node_pool" "primary_preemptible_nodes" {
-  project    = var.project_id
-  name       = "${var.env_name}-node-pool"
-  location   = var.region
-  cluster    = google_container_cluster.my_cluster.name
-  node_count = 1
-
-  #autoscaling {
-  #  total_min_node_count = var.min_node_count
-  #  total_max_node_count = var.max_node_count
-  #}
-
+resource "google_container_node_pool" "node-pool-1" {
+  name           = "node-pool-1"
+  location       = var.region
+  cluster        = google_container_cluster.my_cluster.name
+  node_count     = 1
+  node_locations = ["us-east1-b"]
+ 
   node_config {
-    machine_type = "e2-medium"
-    disk_size_gb = 20
-    image_type   = "COS_CONTAINERD"
-    disk_type    = "pd-standard"
-    labels = {
-      team = "gke"
-    }
+    image_type      = "COS_CONTAINERD"
+    machine_type    = "e2-medium"
+    disk_type       = "pd-standard"
     oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform"
     ]
   }
 }
+
+resource "google_container_node_pool" "node-pool-2" {
+  name           = "node-pool-2"
+  location       = var.region
+  cluster        = google_container_cluster.my_cluster.name
+  node_count     = 1
+  node_locations = ["us-east1-c"]
+ 
+  node_config {
+    image_type      = "COS_CONTAINERD"
+    machine_type    = "e2-medium"
+    disk_type       = "pd-standard"
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/cloud-platform"
+    ]
+  }
+}
+
+resource "google_container_node_pool" "node-pool-3" {
+  name           = "node-pool-3"
+  location       = var.region
+  cluster        = google_container_cluster.my_cluster.name
+  node_count     = 1
+  node_locations = ["us-east1-d"]
+ 
+  node_config {
+    image_type      = "COS_CONTAINERD"
+    machine_type    = "e2-medium"
+    disk_type       = "pd-standard"
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/cloud-platform"
+    ]
+  }
+}
+
 
 resource "google_service_account" "bucket_updater" {
   account_id = "bucket-access"
@@ -80,12 +112,16 @@ resource "google_project_iam_member" "service_usage_permission" {
   member  = "serviceAccount:${google_service_account.bucket_updater.email}"
 }
 
+/*
 resource "kubernetes_namespace" "webapp" {
   metadata {
     name = "webapp"
   }  
+  depends_on = [google_container_cluster.my_cluster]
 }
+*/
 
+/*
 resource "kubernetes_service_account" "name" {
   metadata {
     name = "pod-service-account"
@@ -94,8 +130,12 @@ resource "kubernetes_service_account" "name" {
       "iam.gke.io/gcp-service-account" = google_service_account.bucket_updater.email
     }
   }
-
+  depends_on = [
+    kubernetes_namespace.webapp,
+    google_container_cluster.my_cluster
+  ]
 }
+*/
 
 resource "google_service_account_iam_binding" "workload_identity" {
   service_account_id = google_service_account.bucket_updater.name
