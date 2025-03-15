@@ -36,7 +36,7 @@ resource "google_container_cluster" "my_cluster" {
   }
 
   timeouts {
-    delete = "40m"  # Adjust as needed for your environment
+    delete = "40m" # Adjust as needed for your environment
   }
 
   deletion_protection = false
@@ -48,11 +48,11 @@ resource "google_container_node_pool" "node-pool-1" {
   cluster        = google_container_cluster.my_cluster.name
   node_count     = 1
   node_locations = ["us-east1-b"]
- 
+
   node_config {
-    image_type      = "COS_CONTAINERD"
-    machine_type    = "e2-medium"
-    disk_type       = "pd-standard"
+    image_type   = "COS_CONTAINERD"
+    machine_type = "e2-medium"
+    disk_type    = "pd-standard"
     oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform"
     ]
@@ -65,11 +65,11 @@ resource "google_container_node_pool" "node-pool-2" {
   cluster        = google_container_cluster.my_cluster.name
   node_count     = 1
   node_locations = ["us-east1-c"]
- 
+
   node_config {
-    image_type      = "COS_CONTAINERD"
-    machine_type    = "e2-medium"
-    disk_type       = "pd-standard"
+    image_type   = "COS_CONTAINERD"
+    machine_type = "e2-medium"
+    disk_type    = "pd-standard"
     oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform"
     ]
@@ -82,11 +82,11 @@ resource "google_container_node_pool" "node-pool-3" {
   cluster        = google_container_cluster.my_cluster.name
   node_count     = 1
   node_locations = ["us-east1-d"]
- 
+
   node_config {
-    image_type      = "COS_CONTAINERD"
-    machine_type    = "e2-medium"
-    disk_type       = "pd-standard"
+    image_type   = "COS_CONTAINERD"
+    machine_type = "e2-medium"
+    disk_type    = "pd-standard"
     oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform"
     ]
@@ -95,15 +95,15 @@ resource "google_container_node_pool" "node-pool-3" {
 
 
 resource "google_service_account" "bucket_updater" {
-  account_id = "bucket-access"
+  account_id   = "bucket-access"
   display_name = "Bucket Access"
-  
+
 }
 
 resource "google_project_iam_member" "bucket_updater_role" {
   project = var.project_id
   role    = "roles/storage.admin"
-  member = "serviceAccount:${google_service_account.bucket_updater.email}"
+  member  = "serviceAccount:${google_service_account.bucket_updater.email}"
 }
 
 resource "google_project_iam_member" "service_usage_permission" {
