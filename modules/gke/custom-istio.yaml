@@ -1,0 +1,22 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  name: custom-istio-install
+  namespace: istio-system
+spec:
+  profile: minimal
+  components:
+    pilot:
+      enabled: true
+    ingressGateways:
+      - name: istio-ingressgateway
+        enabled: true
+    egressGateways:
+      - name: istio-egressgateway
+        enabled: true
+    cni:
+      enabled: false   # This disables the Istio CNI integration
+  values:
+    global:
+      proxy:
+        autoInject: enabled
