@@ -68,7 +68,7 @@ resource "google_container_node_pool" "node-pool-2" {
 
   node_config {
     image_type   = "COS_CONTAINERD"
-    machine_type = "e2-medium"
+    machine_type = "n1-standard-4"
     disk_type    = "pd-standard"
     oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform"
@@ -145,3 +145,13 @@ resource "google_service_account_iam_binding" "workload_identity" {
     "serviceAccount:${var.project_id}.svc.id.goog[webapp/pod-service-account]"
   ]
 }
+
+/*
+resource "null_resource" "install_istio" {
+  depends_on = [google_container_cluster.my_cluster]
+
+  provisioner "local-exec" {
+    command = "istioctl install -f custom-istio.yaml --skip-confirmation"
+  }
+}
+*/
