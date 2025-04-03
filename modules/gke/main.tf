@@ -11,10 +11,25 @@ resource "google_container_cluster" "my_cluster" {
 
   node_config {
     disk_type = "pd-standard"
+    service_account = google_service_account.gke_node_sa.email
     oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
       "https://www.googleapis.com/auth/cloud-platform"
     ]
   }
+
+  logging_config {
+    enable_components = ["SYSTEM_COMPONENTS", "WORKLOADS"]
+  }
+
+  monitoring_config {
+    enable_components = ["SYSTEM_COMPONENTS"]
+    managed_prometheus {
+      enabled = true
+    }
+  }
+
 
   private_cluster_config {
     enable_private_nodes    = true
@@ -42,6 +57,31 @@ resource "google_container_cluster" "my_cluster" {
   deletion_protection = false
 }
 
+resource "google_service_account" "gke_node_sa" {
+  account_id   = "gke-node-sa"
+  display_name = "GKE Node Service Account"
+  project      = var.project_id
+}
+
+resource "google_project_iam_member" "gke_node_logging" {
+  project = var.project_id
+  role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${google_service_account.gke_node_sa.email}"
+}
+
+resource "google_project_iam_member" "gke_node_monitoring" {
+  project = var.project_id
+  role    = "roles/monitoring.metricWriter"
+  member  = "serviceAccount:${google_service_account.gke_node_sa.email}"
+}
+
+resource "google_project_iam_member" "gke_node_service" {
+  project = var.project_id
+  role    = "roles/container.nodeServiceAccount"
+  member  = "serviceAccount:${google_service_account.gke_node_sa.email}"
+}
+
+
 resource "google_container_node_pool" "node-pool-1" {
   name           = "node-pool-1"
   location       = var.region
@@ -50,10 +90,14 @@ resource "google_container_node_pool" "node-pool-1" {
   node_locations = ["us-east1-b"]
 
   node_config {
+    service_account = google_service_account.gke_node_sa.email
     image_type   = "COS_CONTAINERD"
-    machine_type = "e2-medium"
+    machine_type = "n1-standard-4"
     disk_type    = "pd-standard"
+
     oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
       "https://www.googleapis.com/auth/cloud-platform"
     ]
   }
@@ -67,10 +111,14 @@ resource "google_container_node_pool" "node-pool-2" {
   node_locations = ["us-east1-c"]
 
   node_config {
+    service_account = google_service_account.gke_node_sa.email
     image_type   = "COS_CONTAINERD"
-    machine_type = "n1-standard-4"
+    machine_type = "e2-medium"
     disk_type    = "pd-standard"
+
     oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
       "https://www.googleapis.com/auth/cloud-platform"
     ]
   }
@@ -84,10 +132,14 @@ resource "google_container_node_pool" "node-pool-3" {
   node_locations = ["us-east1-d"]
 
   node_config {
+    service_account = google_service_account.gke_node_sa.email
     image_type   = "COS_CONTAINERD"
     machine_type = "e2-medium"
     disk_type    = "pd-standard"
+
     oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
       "https://www.googleapis.com/auth/cloud-platform"
     ]
   }
