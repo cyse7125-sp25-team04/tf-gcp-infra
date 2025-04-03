@@ -16,7 +16,7 @@ module "subnets" {
   public_subnet_cidr  = "10.1.0.0/20"  # Public subnet for bastion/load balancers
   pod_ip_range        = "10.16.0.0/12" # Pod IP range
   service_ip_range    = "10.32.0.0/16" # Service IP range
-}
+
 
 module "router" {
   source     = "../modules/router"
